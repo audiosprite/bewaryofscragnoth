@@ -26,17 +26,16 @@ String.prototype.supplant = function (o) {
 const pickTemplate = function(){
     var bbtemplates = soapstone.bloodborne.templates;
     var templateIndex = Math.floor(Math.random() * (bbtemplates.length + 1));
-    // console.log(bbtemplates[templateIndex]);
     return bbtemplates[templateIndex];
 }
 
-const template = pickTemplate();
+// const template = pickTemplate();
+const template = '{vbg} is effective';
 
 //function that organizes which queries to perform
 
 const pickQueries = function(template){
     var nounQueries = 0, verbQueries = 0, vonQueries = 0;
-    // console.log(template)
     for (var i = 0; i < template.length; i++){
         if (template[i] === '{'){
             if (template.substring(i, i+4) === '{nn}'){
@@ -60,13 +59,23 @@ const queries = pickQueries(template);
 //function that updates requestObj
 
 const updateRequestObj = function(queries){
-    var requestObj = {
-        url: 'https://api.magicthegathering.io/v1/cards'
+    var requestObj = {};
+    var requestUrl = 'https://api.magicthegathering.io/v1/cards';
+    var totalQueries = queries.nounQueries + queries.verbQueries + queries.vonQueries;
+    // console.log('totalqueries', totalQueries)
+    for (var i = 0; i < totalQueries; i++){
+        // console.log('nounqueries', queries.nounQueries)
+        if (queries.nounQueries > 0){
+            var thisUrl = 'url' + i;
+            // console.log('thisUrl', thisUrl)
+            requestObj[thisUrl] = requestUrl + '?types=creature';
+        }
+        if (queries.verbQueries > 0) {
+            var thisUrl = 'url' + i;
+            requestObj[thisUrl] = requestUrl + '?types=instant';
+        }
     }
-    if (queries.nounQueries > 0){
-        requestObj.url += '?types=creature'
-        // console.log(requestObj.url)
-    }
+    // console.log('reqobj', requestObj);
     return requestObj;
 }
 
@@ -75,42 +84,39 @@ requestObj = updateRequestObj(queries);
 //function that performs mtg queries, then posts
 
 const performMTGQueries = function(requestObj){
-    request(requestObj, function(err, res, body){
+    for (var query in requestObj){
+        console.log('query', requestObj[query]);
+    }
+    console.log(requestObj);
+    request(requestObj.url0, function(err, res, body){
         cards = JSON.parse(body).cards;
-        // console.log(cards[0]);
         var card = cards[Math.floor(Math.random() * (cards.length + 1))].name.toLowerCase();
-        // console.log('beforefinal', template, card)
         var status = interpolate(template, card);
         console.log('final: ', status);
-        
-        T.post('statuses/update', { status }, function(err, data, response) {
-            console.log(data)
-        })
+
+        // POST !!!
+        // T.post('statuses/update', { status }, function(err, data, response) {
+        //     console.log(data.created_at);
+        // })
     })
 }
 
 const creature = performMTGQueries(requestObj);
-// console.log(creature);
 
 //function that interpolates the two together
 // have: template, creature
 
-const interpolate = function(template, creature){
-    // console.log('template: ', template, 'creature: ', creature)
+const interpolate = function(template, card){
     var supplantObj = {
-        nn: creature
+        nn: card,
+        vbg: card
     }
     return template.supplant(supplantObj);
 }
 
-// const final = interpolate(template, creature);
-// console.log(final);
+// const oneMTGQuery = function(){
 
-// console.log(soapstone);
-
-
-
-
+// }
 
 
 

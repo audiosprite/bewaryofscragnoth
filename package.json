@@ -1,0 +1,17 @@
+{
+  "name": "darksoulsmtg",
+  "version": "1.0.0",
+  "description": "",
+  "main": "bot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mtgsdk": "^0.1.1",
+    "request": "^2.76.0",
+    "rita": "^1.1.40",
+    "twit": "^2.2.5"
+  }
+}

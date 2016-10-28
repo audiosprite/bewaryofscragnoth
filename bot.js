@@ -1,7 +1,15 @@
 // const mtg = require('mtgsdk');
-const twit = require('twit');
+const Twit = require('twit');
 const soapstone = require('./soapstone');
 const request = require('request');
+
+var T = new Twit({
+  consumer_key:         't1E9h6v79789TovbKyiQ1pBhB',
+  consumer_secret:      '0yHMEgTEWBiUenMmiahLzkUWtFE0iKTH4jupEoqq3Nxz7jyTxH',
+  access_token:         '792118844148023296-DgHa6H4ju6Efeq8La4OdhIi7SWijYx6',
+  access_token_secret:  'i2B31R52neKt1qrZWUF0R42r4EqLM4nJFDGl9iX6Eh76h',
+  timeout_ms:           60*1000,  // optional HTTP request timeout to apply to all requests.
+})
 
 String.prototype.supplant = function (o) {
     return this.replace(/{([^{}]*)}/g,
@@ -18,7 +26,7 @@ String.prototype.supplant = function (o) {
 const pickTemplate = function(){
     var bbtemplates = soapstone.bloodborne.templates;
     var templateIndex = Math.floor(Math.random() * (bbtemplates.length + 1));
-    console.log(bbtemplates[templateIndex]);
+    // console.log(bbtemplates[templateIndex]);
     return bbtemplates[templateIndex];
 }
 
@@ -28,7 +36,7 @@ const template = pickTemplate();
 
 const pickQueries = function(template){
     var nounQueries = 0, verbQueries = 0, vonQueries = 0;
-    console.log(template)
+    // console.log(template)
     for (var i = 0; i < template.length; i++){
         if (template[i] === '{'){
             if (template.substring(i, i+4) === '{nn}'){
@@ -57,19 +65,46 @@ const updateRequestObj = function(queries){
     }
     if (queries.nounQueries > 0){
         requestObj.url += '?types=creature'
-        console.log(requestObj.url)
+        // console.log(requestObj.url)
     }
+    return requestObj;
 }
 
-updateRequestObj(queries);
+requestObj = updateRequestObj(queries);
 
-//function that performs mtg queries
+//function that performs mtg queries, then posts
 
-const preformMTGQueries = function(requestObj){
-    
+const performMTGQueries = function(requestObj){
+    request(requestObj, function(err, res, body){
+        cards = JSON.parse(body).cards;
+        // console.log(cards[0]);
+        var card = cards[Math.floor(Math.random() * (cards.length + 1))].name.toLowerCase();
+        // console.log('beforefinal', template, card)
+        var status = interpolate(template, card);
+        console.log('final: ', status);
+        
+        T.post('statuses/update', { status }, function(err, data, response) {
+            console.log(data)
+        })
+    })
 }
+
+const creature = performMTGQueries(requestObj);
+// console.log(creature);
 
 //function that interpolates the two together
+// have: template, creature
+
+const interpolate = function(template, creature){
+    // console.log('template: ', template, 'creature: ', creature)
+    var supplantObj = {
+        nn: creature
+    }
+    return template.supplant(supplantObj);
+}
+
+// const final = interpolate(template, creature);
+// console.log(final);
 
 // console.log(soapstone);
 

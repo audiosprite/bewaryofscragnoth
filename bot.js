@@ -25,12 +25,21 @@ String.prototype.supplant = function (o) {
 //function that picks a dark souls message template
 const pickTemplate = function(){
     var bbtemplates = soapstone.bloodborne.templates;
-    var templateIndex = Math.floor(Math.random() * (bbtemplates.length + 1));
-    return bbtemplates[templateIndex];
+    var bbconjunctions = soapstone.bloodborne.conjunctions;
+    var templateIndexA = Math.floor(Math.random() * (bbtemplates.length));
+    if (Math.random() > 0.5){
+        var templateIndexB = Math.floor(Math.random() * (bbtemplates.length));
+        var whichConjunction = bbconjunctions[Math.floor(Math.random() * (bbconjunctions.length))];
+        console.log('whichConjunction: ', whichConjunction, bbconjunctions.length)
+        var template = bbtemplates[templateIndexA] + " " + whichConjunction + " " + bbtemplates[templateIndexB];
+    } else {
+        template = bbtemplates[templateIndexA];
+    }
+    return template;
 }
 
-// const template = pickTemplate();
-const template = '{vbg} is effective';
+const template = pickTemplate();
+// const template = '{vbg} is effective but treat {nn} with care';
 
 //function that organizes which queries to perform
 
@@ -59,7 +68,7 @@ const queries = pickQueries(template);
 //function that updates requestObj
 
 const updateRequestObj = function(queries){
-    var requestObj = {};
+    var requestObj = queries;
     var requestUrl = 'https://api.magicthegathering.io/v1/cards';
     var totalQueries = queries.nounQueries + queries.verbQueries + queries.vonQueries;
     // console.log('totalqueries', totalQueries)

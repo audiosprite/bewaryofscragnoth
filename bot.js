@@ -152,9 +152,9 @@ const findVerbs = function(spell){
 const participleVerbs = function(spell){
     spell = spell.split(' ');
     var indexOfVerb = findVerbs(spell);
-    if (spell.length === 1 && spell[0][spell[0].length-1] !== 'e'){
-        spell[0][spell[0].length-1] === 'i' ?
-        addIng = spell[0] + 'ng' :
+    if (spell.length === 1){
+        spell[0][spell[0].length-1] === 'i' || spell[0][spell[0].length-1] === 'e' ?
+        addIng = spell[0].substring(0, spell[0].length-1) + 'ing' :
         addIng = spell[0] + 'ing';
         return addIng;
     } else if (indexOfVerb !== -1){
@@ -167,7 +167,7 @@ const participleVerbs = function(spell){
 }
 
 // console.log(participleVerbs('boomerang'))
-// console.log('testfinal', interpolate('try {vbg}', 'release the hounds'));
+console.log('testfinal', interpolate('try {vbg}', 'chaoslace'));
 
 //function to pluralize in certain noun instances
 

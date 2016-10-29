@@ -8,7 +8,16 @@ String.prototype.supplant = function (o) {
 };
 
 const dasouls = {
-    
+    templates: [
+        '{nn} ahead',
+        'be wary of {nn}',
+        'try {vbg}',
+        'need {vbg}',
+        'imminent {nn}...',
+        'weakness: {either}',
+        '{nn}',
+        '{either}?'
+    ]
 }
 
 const bloodborne = {

@@ -2,6 +2,7 @@
 const Twit = require('twit');
 const soapstone = require('./soapstone');
 const request = require('request');
+var rp = require('request-promise');
 
 var T = new Twit({
   consumer_key:         't1E9h6v79789TovbKyiQ1pBhB',
@@ -38,8 +39,8 @@ const pickTemplate = function(){
     return template;
 }
 
-const template = pickTemplate();
-// const template = '{vbg} is effective but treat {nn} with care';
+// const template = pickTemplate();
+const template = '{vbg} is effective but treat {nn} with care';
 
 //function that organizes which queries to perform
 
@@ -49,9 +50,9 @@ const pickQueries = function(template){
         if (template[i] === '{'){
             if (template.substring(i, i+4) === '{nn}'){
                 nounQueries++;
-            } else if (template.substring(i, i+5) === '{vbg}'){
+            } if (template.substring(i, i+5) === '{vbg}'){
                 verbQueries++;
-            } else if (template.substring(i, i+4) === '{vbg_or_nn}'){
+            } if (template.substring(i, i+4) === '{vbg_or_nn}'){
                 vonQueries++;
             }
         }

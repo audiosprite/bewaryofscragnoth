@@ -170,20 +170,28 @@ const performMTGQueries = function(requestObj){
                     // console.log(card2Obj)
                     status = interpolate(status, card2Obj);
                     console.log('final2: ', status);
-                    gm(framptraw)
-                        .resize(240, 240, '!')
-                        .write('./resize.png', function (err) {
-                            if (!err) console.log('done');
-                        });
+                    // imageInterpolate(status);
+                    T.post('statuses/update', { status }, function(err, data, response) {
+                        console.log(data.created_at);
+                    })
                 })} else {
                     console.log('final1: ', status);
-                    gm(framptraw)
-                        .resize(240, 240, '!')
-                        .write('./resize.png', function (err) {
-                            if (!err) console.log('done');
-                        });
+                    // imageInterpolate(status);
+                    T.post('statuses/update', { status }, function(err, data, response) {
+                        console.log(data.created_at);
+                    })
                 }
         })
+}
+
+const imageInterpolate = function(status){
+    gm(framptraw)
+        .stroke("#ffffff")
+        .font("Arial.ttf", 60)
+        .drawText(590, 250, status)
+        .write('./resize.png', function (err) {
+            if (!err) console.log('done');
+        });
 }
 
 const creature = performMTGQueries(requestObj);

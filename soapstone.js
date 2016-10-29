@@ -41,15 +41,15 @@ const dasouls3 = {
         'ahh. {nn}...'
     ],
     conjunctions: [
-        'and then',
-        'but',
-        'therefore',
-        'in short',
-        'or',
-        'only',
-        'by the way',
-        'so to speak',
-        'all the more',
+        ' and then',
+        ' but',
+        ' therefore',
+        ' in short',
+        ' or',
+        ' only',
+        ' by the way',
+        ' so to speak',
+        ' all the more',
         '.'
     ]
 }
@@ -78,11 +78,11 @@ const bloodborne = {
         'oh, {nn}!'
     ],
     conjunctions: [
-        'and',
-        'but',
-        'or',
-        'therefore',
-        'eventually',
+        ' and',
+        ' but',
+        ' or',
+        ' therefore',
+        ' eventually',
         ','
     ]
 };

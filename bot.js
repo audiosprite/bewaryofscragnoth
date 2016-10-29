@@ -2,7 +2,8 @@
 const Twit = require('twit');
 const soapstone = require('./soapstone');
 const request = require('request');
-var rp = require('request-promise');
+const rp = require('request-promise');
+const rita = require('rita');
 
 var T = new Twit({
   consumer_key:         't1E9h6v79789TovbKyiQ1pBhB',
@@ -35,11 +36,11 @@ const pickTemplate = function({bloodborne, dasouls, dasouls3}){
         var templateIndexB = Math.floor(Math.random() * (usedTemplates.templates.length));
         var whichConjunction = usedTemplates.conjunctions[Math.floor(Math.random() * (usedTemplates.conjunctions.length))];
         // console.log('whichConjunction: ', whichConjunction, usedTemplates.length)
-        var template = usedTemplates.templates[templateIndexA] + " " + whichConjunction + " " + usedTemplates.templates[templateIndexB];
+        var template = usedTemplates.templates[templateIndexA] + whichConjunction + " " + usedTemplates.templates[templateIndexB];
     } else {
         template = usedTemplates.templates[templateIndexA];
     }
-    // console.log(template)
+    console.log(rita.RiTa.getPosTagsInline(template));
     return template;
 }
 
@@ -123,9 +124,57 @@ const creature = performMTGQueries(requestObj);
 const interpolate = function(template, card){
     var supplantObj = {
         nn: card,
-        vbg: card
+        // vbg, card,
+        vbg: participleVerbs(card)
     }
-    return template.supplant(supplantObj);
+    var final = template.supplant(supplantObj);
+    return final;
+}
+
+//function to find verbs in mtg card
+
+const findVerbs = function(spell){
+    var ritaspell = rita.RiTa.getPosTags(spell);
+    // console.log(ritaspell);
+    var numverbs = 0;
+    for (var i = 0; i < ritaspell.length; i++){
+        ritaspell[i] === 'vb' ?
+        numverbs++ :
+        numverbs;
+        // rita.RiLexicon.isVerb(spell[i]) ? numverbs++ : numverbs;
+    }
+    numverbs === 1 ? index = ritaspell.indexOf('vb') : index = -1;
+    return index;
+}
+
+//function to turn verbs (instants/sorceries) into present participle versions
+
+const participleVerbs = function(spell){
+    spell = spell.split(' ');
+    var indexOfVerb = findVerbs(spell);
+    if (spell.length === 1 && spell[0][spell[0].length-1] !== 'e'){
+        spell[0][spell[0].length-1] === 'i' ?
+        addIng = spell[0] + 'ng' :
+        addIng = spell[0] + 'ing';
+        return addIng;
+    } else if (indexOfVerb !== -1){
+        console.log('in -1', spell)
+        spell[indexOfVerb] = rita.RiTa.getPresentParticiple(spell[indexOfVerb]);
+        return spell.join(' ');
+    } else {
+        return spell.join(' ');
+    }
+}
+
+// console.log(participleVerbs('boomerang'))
+// console.log('testfinal', interpolate('try {vbg}', 'release the hounds'));
+
+//function to pluralize in certain noun instances
+
+const pluralize = function(creature){
+    //findNouns
+    //rita.RiTa.pluralize(creature(findNouns));
+    //return creature
 }
 
 // const oneMTGQuery = function(){

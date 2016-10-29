@@ -79,7 +79,6 @@ const updateRequestObj = function(queries){
     var totalQueries = queries.nounQueries + queries.verbQueries + queries.vonQueries;
     var querycount = 0;
     while (queries.nounQueries || queries.verbQueries || queries.vonQueries){
-        // console.log('while')
         if (queries.nounQueries){
             var thisUrl = 'url' + querycount;
             requestObj[thisUrl] = requestUrl + '?types=creature';
@@ -88,7 +87,7 @@ const updateRequestObj = function(queries){
         }
         if (queries.verbQueries){
             var thisUrl = 'url' + querycount;
-            requestObj[thisUrl] = requestUrl + '?types=instant';
+            requestObj[thisUrl] = requestUrl + '?types=instant||sorcery';
             querycount++;
             queries.verbQueries--;
         }
@@ -115,7 +114,7 @@ const performMTGQueries = function(requestObj){
                 cardObj = {
                     nn: card
                 }
-            } else if (requestObj.url0 === 'https://api.magicthegathering.io/v1/cards?types=instant') {
+            } else if (requestObj.url0 === 'https://api.magicthegathering.io/v1/cards?types=instant||sorcery') {
                 cardObj = {
                     vbg: participleVerbs(card)
                 }
@@ -123,7 +122,8 @@ const performMTGQueries = function(requestObj){
             console.log(cardObj)
             var status = interpolate(template, cardObj);
             console.log('final: ', status);
-            rp(requestObj.url1)
+            if(requestObj.url1)
+            {rp(requestObj.url1)
                 .then(function(cards2){
                     cards2 = JSON.parse(cards2).cards;
                     var card2 = cards2[Math.floor(Math.random() * (cards2.length + 1))].name.toLowerCase();
@@ -131,7 +131,7 @@ const performMTGQueries = function(requestObj){
                         card2Obj = {
                             nn: card2
                         }
-                    } else if (requestObj.url1 === 'https://api.magicthegathering.io/v1/cards?types=instant') {
+                    } else if (requestObj.url1 === 'https://api.magicthegathering.io/v1/cards?types=instant||sorcery') {
                         card2Obj = {
                             vbg: participleVerbs(card2)
                         }
@@ -139,7 +139,9 @@ const performMTGQueries = function(requestObj){
                     console.log(card2Obj)
                     status = interpolate(status, card2Obj);
                     console.log('final2: ', status);
-                }) 
+                })} else {
+                    console.log('final1: ', status)
+                }
         })
 }
 
@@ -149,10 +151,6 @@ const creature = performMTGQueries(requestObj);
 // have: template, creature
 
 const interpolate = function(template, supplantObj){
-    // var supplantObj = {
-    //     nn: card,
-    //     vbg: participleVerbs(card)
-    // }
     var final = template.supplant(supplantObj);
     return final;
 }
@@ -161,13 +159,11 @@ const interpolate = function(template, supplantObj){
 
 const findVerbs = function(spell){
     var ritaspell = rita.RiTa.getPosTags(spell);
-    // console.log(ritaspell);
     var numverbs = 0;
     for (var i = 0; i < ritaspell.length; i++){
         ritaspell[i] === 'vb' ?
         numverbs++ :
         numverbs;
-        // rita.RiLexicon.isVerb(spell[i]) ? numverbs++ : numverbs;
     }
     numverbs === 1 ? index = ritaspell.indexOf('vb') : index = -1;
     return index;

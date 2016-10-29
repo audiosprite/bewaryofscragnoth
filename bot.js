@@ -24,23 +24,27 @@ String.prototype.supplant = function (o) {
 //trying to practice API so using api.magicthegathering.io instead of mtgsdk
 
 //function that picks a dark souls message template
-const pickTemplate = function(){
-    var bbtemplates = soapstone.bloodborne.templates;
-    var bbconjunctions = soapstone.bloodborne.conjunctions;
-    var templateIndexA = Math.floor(Math.random() * (bbtemplates.length));
-    if (Math.random() > 0.5){
-        var templateIndexB = Math.floor(Math.random() * (bbtemplates.length));
-        var whichConjunction = bbconjunctions[Math.floor(Math.random() * (bbconjunctions.length))];
-        console.log('whichConjunction: ', whichConjunction, bbconjunctions.length)
-        var template = bbtemplates[templateIndexA] + " " + whichConjunction + " " + bbtemplates[templateIndexB];
+const pickTemplate = function({bloodborne, dasouls, dasouls3}){
+    var randomTemplate = Math.random();
+    (randomTemplate > 0.66) ? (usedTemplates = dasouls3) :
+    (0.66 >= randomTemplate > 0.33) ? (usedTemplates = bloodborne) :
+    usedTemplates = dasouls;
+    var templateIndexA = Math.floor(Math.random() * (usedTemplates.templates.length));
+    // console.log('usedtemplates', usedTemplates);
+    if ((usedTemplates === bloodborne || usedTemplates === dasouls3) && (Math.random() > 0.5)){
+        var templateIndexB = Math.floor(Math.random() * (usedTemplates.templates.length));
+        var whichConjunction = usedTemplates.conjunctions[Math.floor(Math.random() * (usedTemplates.conjunctions.length))];
+        // console.log('whichConjunction: ', whichConjunction, usedTemplates.length)
+        var template = usedTemplates.templates[templateIndexA] + " " + whichConjunction + " " + usedTemplates.templates[templateIndexB];
     } else {
-        template = bbtemplates[templateIndexA];
+        template = usedTemplates.templates[templateIndexA];
     }
+    // console.log(template)
     return template;
 }
 
-// const template = pickTemplate();
-const template = '{vbg} is effective but treat {nn} with care';
+const template = pickTemplate(soapstone);
+// const template = '{vbg} is effective but treat {nn} with care';
 
 //function that organizes which queries to perform
 

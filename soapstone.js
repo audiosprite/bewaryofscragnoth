@@ -18,6 +18,40 @@ const dasouls = {
         '{nn}',
         '{either}?'
     ]
+};
+
+const dasouls3 = {
+    templates: [
+        '{nn} ahead',
+        'no {nn} ahead',
+        '{vbg} required ahead',
+        'be wary of {nn}',
+        'try {vbg}',
+        // 'could this be a {nonlegendary}?',
+        // 'if only i had a {artifact}',
+        'visions of {nn}',
+        'time for {vbg}',
+        '{nn}',
+        '{nn}!',
+        '{nn}?',
+        '{nn}...',
+        "huh. it's a {nonlegendary}",
+        'praise the {nn}!',
+        'let there be {vbg}',
+        'ahh. {nn}...'
+    ],
+    conjunctions: [
+        'and then',
+        'but',
+        'therefore',
+        'in short',
+        'or',
+        'only',
+        'by the way',
+        'so to speak',
+        'all the more',
+        '.'
+    ]
 }
 
 const bloodborne = {
@@ -55,7 +89,8 @@ const bloodborne = {
 
 const soapstone = {
     bloodborne,
-    dasouls
+    dasouls,
+    dasouls3
 };
 
 module.exports = soapstone;

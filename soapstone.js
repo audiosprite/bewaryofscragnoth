@@ -35,7 +35,8 @@ const dasouls3 = {
         '{nn}!',
         '{nn}?',
         '{nn}...',
-        "huh. it's a {nonlegendary}",
+        "huh. it's a {nn}",
+        // "huh. it's a {nonlegendary}",
         'praise the {nn}!',
         'let there be {vbg}',
         'ahh. {nn}...'

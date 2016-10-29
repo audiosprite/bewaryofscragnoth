@@ -57,7 +57,7 @@ const pickQueries = function(template){
                 nounQueries++;
             } if (template.substring(i, i+5) === '{vbg}'){
                 verbQueries++;
-            } if (template.substring(i, i+4) === '{vbg_or_nn}'){
+            } if (template.substring(i, i+4) === '{anycard}'){
                 vonQueries++;
             }
         }
@@ -77,20 +77,23 @@ const updateRequestObj = function(queries){
     var requestObj = queries;
     var requestUrl = 'https://api.magicthegathering.io/v1/cards';
     var totalQueries = queries.nounQueries + queries.verbQueries + queries.vonQueries;
-    // console.log('totalqueries', totalQueries)
-    for (var i = 0; i < totalQueries; i++){
-        // console.log('nounqueries', queries.nounQueries)
-        if (queries.nounQueries > 0){
-            var thisUrl = 'url' + i;
-            // console.log('thisUrl', thisUrl)
+    var querycount = 0;
+    while (queries.nounQueries || queries.verbQueries || queries.vonQueries){
+        // console.log('while')
+        if (queries.nounQueries){
+            var thisUrl = 'url' + querycount;
             requestObj[thisUrl] = requestUrl + '?types=creature';
+            querycount++;
+            queries.nounQueries--;
         }
-        if (queries.verbQueries > 0) {
-            var thisUrl = 'url' + i;
+        if (queries.verbQueries){
+            var thisUrl = 'url' + querycount;
             requestObj[thisUrl] = requestUrl + '?types=instant';
+            querycount++;
+            queries.verbQueries--;
         }
     }
-    // console.log('reqobj', requestObj);
+    requestObj.json = true;
     return requestObj;
 }
 
@@ -103,17 +106,41 @@ const performMTGQueries = function(requestObj){
         console.log('query', requestObj[query]);
     }
     console.log(requestObj);
-    request(requestObj.url0, function(err, res, body){
-        cards = JSON.parse(body).cards;
-        var card = cards[Math.floor(Math.random() * (cards.length + 1))].name.toLowerCase();
-        var status = interpolate(template, card);
-        console.log('final: ', status);
-
-        // POST !!!
-        // T.post('statuses/update', { status }, function(err, data, response) {
-        //     console.log(data.created_at);
-        // })
-    })
+    rp(requestObj.url0)
+        .then(function(cards){
+            // console.log(cards)
+            cards = JSON.parse(cards).cards;
+            var card = cards[Math.floor(Math.random() * (cards.length + 1))].name.toLowerCase();
+            if (requestObj.url0 === 'https://api.magicthegathering.io/v1/cards?types=creature') {
+                cardObj = {
+                    nn: card
+                }
+            } else if (requestObj.url0 === 'https://api.magicthegathering.io/v1/cards?types=instant') {
+                cardObj = {
+                    vbg: participleVerbs(card)
+                }
+            }
+            console.log(cardObj)
+            var status = interpolate(template, cardObj);
+            console.log('final: ', status);
+            rp(requestObj.url1)
+                .then(function(cards2){
+                    cards2 = JSON.parse(cards2).cards;
+                    var card2 = cards2[Math.floor(Math.random() * (cards2.length + 1))].name.toLowerCase();
+                    if (requestObj.url1 === 'https://api.magicthegathering.io/v1/cards?types=creature') {
+                        card2Obj = {
+                            nn: card2
+                        }
+                    } else if (requestObj.url1 === 'https://api.magicthegathering.io/v1/cards?types=instant') {
+                        card2Obj = {
+                            vbg: participleVerbs(card2)
+                        }
+                    }
+                    console.log(card2Obj)
+                    status = interpolate(status, card2Obj);
+                    console.log('final2: ', status);
+                }) 
+        })
 }
 
 const creature = performMTGQueries(requestObj);
@@ -121,12 +148,11 @@ const creature = performMTGQueries(requestObj);
 //function that interpolates the two together
 // have: template, creature
 
-const interpolate = function(template, card){
-    var supplantObj = {
-        nn: card,
-        // vbg, card,
-        vbg: participleVerbs(card)
-    }
+const interpolate = function(template, supplantObj){
+    // var supplantObj = {
+    //     nn: card,
+    //     vbg: participleVerbs(card)
+    // }
     var final = template.supplant(supplantObj);
     return final;
 }
@@ -152,12 +178,13 @@ const findVerbs = function(spell){
 const participleVerbs = function(spell){
     spell = spell.split(' ');
     var indexOfVerb = findVerbs(spell);
-    if (spell.length === 1){
-        spell[0][spell[0].length-1] === 'i' || spell[0][spell[0].length-1] === 'e' ?
-        addIng = spell[0].substring(0, spell[0].length-1) + 'ing' :
-        addIng = spell[0] + 'ing';
-        return addIng;
-    } else if (indexOfVerb !== -1){
+    // if (spell.length === 1){
+    //     spell[0][spell[0].length-1] === 'i' || spell[0][spell[0].length-1] === 'e' ?
+    //     addIng = spell[0].substring(0, spell[0].length-1) + 'ing' :
+    //     addIng = spell[0] + 'ing';
+    //     return addIng;
+    // } else if (indexOfVerb !== -1){
+    if (indexOfVerb !== -1){
         console.log('in -1', spell)
         spell[indexOfVerb] = rita.RiTa.getPresentParticiple(spell[indexOfVerb]);
         return spell.join(' ');
@@ -167,15 +194,35 @@ const participleVerbs = function(spell){
 }
 
 // console.log(participleVerbs('boomerang'))
-console.log('testfinal', interpolate('try {vbg}', 'chaoslace'));
+// console.log('testfinal', interpolate('try {vbg}', 'chaoslace'));
 
-//function to pluralize in certain noun instances
+//function to find nouns in creature
 
-const pluralize = function(creature){
-    //findNouns
-    //rita.RiTa.pluralize(creature(findNouns));
-    //return creature
+const findNouns = function(creature){
+    var ritaCreature = rita.RiTa.getPosTags(creature);
+    var numnouns = 0;
+    for (var i = 0; i < ritaCreature.length; i++){
+        ritaCreature[i] === 'nn' ?
+        numnouns++ :
+        numnouns;
+        // rita.RiLexicon.isVerb(spell[i]) ? numnouns++ : numnouns;
+    }
+    numnouns === 1 ? index = ritaCreature.indexOf('nn') : index = -1;
+    return index;
 }
+
+//function to puralize nouns 
+
+const pluralizeNouns = function(creature){
+    creature = creature.split(' ');
+    var indexOfNoun = findNouns(creature);
+    if (indexOfNoun !== -1){
+        creature[indexOfNoun] = rita.RiTa.pluralize(creature[indexOfNoun]);
+    }
+    return creature.join(' ');
+}
+
+console.log(pluralizeNouns('ravenous rat'));
 
 // const oneMTGQuery = function(){
 

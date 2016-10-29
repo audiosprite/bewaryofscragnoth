@@ -4,6 +4,9 @@ const soapstone = require('./soapstone');
 const request = require('request');
 const rp = require('request-promise');
 const rita = require('rita');
+const fs = require('fs');
+const gm = require('gm').subClass({imageMagick: true});
+const framptraw = './frampt-raw.jpg';
 
 var T = new Twit({
   consumer_key:         't1E9h6v79789TovbKyiQ1pBhB',
@@ -40,43 +43,59 @@ const pickTemplate = function({bloodborne, dasouls, dasouls3}){
     } else {
         template = usedTemplates.templates[templateIndexA];
     }
-    console.log(rita.RiTa.getPosTagsInline(template));
+    // console.log(rita.RiTa.getPosTagsInline(template));
     return template;
 }
 
 const template = pickTemplate(soapstone);
-// const template = '{vbg} is effective but treat {nn} with care';
+// var template = '{vbg} is effective but treat {either} with care';
 
 //function that organizes which queries to perform
 
-const pickQueries = function(template){
-    var nounQueries = 0, verbQueries = 0, vonQueries = 0;
+const pickQueries = function(){
+    var nounQueries = 0, verbQueries = 0, vonQueries = 0, anyQueries = 0;
     for (var i = 0; i < template.length; i++){
         if (template[i] === '{'){
             if (template.substring(i, i+4) === '{nn}'){
                 nounQueries++;
             } if (template.substring(i, i+5) === '{vbg}'){
                 verbQueries++;
-            } if (template.substring(i, i+4) === '{anycard}'){
-                vonQueries++;
+            } if (template.substring(i, i+8) === '{either}' ||
+                  template.substring(i, i+8) === '{anycard}'){
+                if (Math.random() > 0.5){
+                    nounQueries++;
+                    var supplObj = {
+                        either: '{nn}',
+                        anycard: '{nn}'
+                    }
+                } else {
+                    verbQueries++;
+                    supplyObj = {
+                        either: '{vbg}',
+                        anycard: '{vbg}'
+                    }
+                }
+                template = template.supplant(supplObj);
+            } if (template.substring(i, i+8) === '{anycard}'){
+                anyQueries++;
             }
         }
     }
     return {
         nounQueries,
         verbQueries,
-        vonQueries
+        vonQueries,
+        anyQueries
     }
 }
 
-const queries = pickQueries(template);
+const queries = pickQueries();
 
 //function that updates requestObj
 
 const updateRequestObj = function(queries){
     var requestObj = queries;
     var requestUrl = 'https://api.magicthegathering.io/v1/cards';
-    var totalQueries = queries.nounQueries + queries.verbQueries + queries.vonQueries;
     var querycount = 0;
     while (queries.nounQueries || queries.verbQueries || queries.vonQueries){
         if (queries.nounQueries){
@@ -91,6 +110,16 @@ const updateRequestObj = function(queries){
             querycount++;
             queries.verbQueries--;
         }
+        if (queries.vonQueries){
+            var thisUrl = 'url' + querycount;
+            if (Math.random() > 0.5){
+                requestObj[thisUrl] = requestUrl + '?types=instant||sorcery';
+            } else {
+                requestObj[thisUrl] = requestUrl + '?types=creature';
+            }
+            querycount++;
+            queries.vonQueries--;
+        }
     }
     requestObj.json = true;
     return requestObj;
@@ -102,26 +131,28 @@ requestObj = updateRequestObj(queries);
 
 const performMTGQueries = function(requestObj){
     for (var query in requestObj){
-        console.log('query', requestObj[query]);
+        // console.log('query', requestObj[query]);
     }
-    console.log(requestObj);
+    // console.log(requestObj);
     rp(requestObj.url0)
         .then(function(cards){
             // console.log(cards)
             cards = JSON.parse(cards).cards;
             var card = cards[Math.floor(Math.random() * (cards.length + 1))].name.toLowerCase();
             if (requestObj.url0 === 'https://api.magicthegathering.io/v1/cards?types=creature') {
-                cardObj = {
+                if (Math.random() > 0.4){ cardObj = { nn: card } }
+                else { cardObj = { 
                     nn: card
-                }
+                    // nn:pluralizeNouns(card) replace when fix puralizeNouns
+                } }
             } else if (requestObj.url0 === 'https://api.magicthegathering.io/v1/cards?types=instant||sorcery') {
                 cardObj = {
                     vbg: participleVerbs(card)
                 }
             }
-            console.log(cardObj)
+            // console.log(cardObj)
             var status = interpolate(template, cardObj);
-            console.log('final: ', status);
+            // console.log('final: ', status);
             if(requestObj.url1)
             {rp(requestObj.url1)
                 .then(function(cards2){
@@ -136,11 +167,21 @@ const performMTGQueries = function(requestObj){
                             vbg: participleVerbs(card2)
                         }
                     }
-                    console.log(card2Obj)
+                    // console.log(card2Obj)
                     status = interpolate(status, card2Obj);
                     console.log('final2: ', status);
+                    gm(framptraw)
+                        .resize(240, 240, '!')
+                        .write('./resize.png', function (err) {
+                            if (!err) console.log('done');
+                        });
                 })} else {
-                    console.log('final1: ', status)
+                    console.log('final1: ', status);
+                    gm(framptraw)
+                        .resize(240, 240, '!')
+                        .write('./resize.png', function (err) {
+                            if (!err) console.log('done');
+                        });
                 }
         })
 }
@@ -218,7 +259,7 @@ const pluralizeNouns = function(creature){
     return creature.join(' ');
 }
 
-console.log(pluralizeNouns('ravenous rat'));
+// console.log(pluralizeNouns('ravenous rat'));
 
 // const oneMTGQuery = function(){
 

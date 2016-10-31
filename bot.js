@@ -34,7 +34,6 @@ const pickTemplate = function({bloodborne, dasouls, dasouls3}){
     (0.66 >= randomTemplate > 0.33) ? (usedTemplates = bloodborne) :
     usedTemplates = dasouls;
     var templateIndexA = Math.floor(Math.random() * (usedTemplates.templates.length));
-    // console.log('usedtemplates', usedTemplates);
     if ((usedTemplates === bloodborne || usedTemplates === dasouls3) && (Math.random() > 0.5)){
         var templateIndexB = Math.floor(Math.random() * (usedTemplates.templates.length));
         var whichConjunction = usedTemplates.conjunctions[Math.floor(Math.random() * (usedTemplates.conjunctions.length))];
@@ -48,7 +47,7 @@ const pickTemplate = function({bloodborne, dasouls, dasouls3}){
 }
 
 const template = pickTemplate(soapstone);
-// var template = '{vbg} is effective but treat {either} with care';
+// var template = '{vbg} is effective but treat {anycard} with care';
 
 //function that organizes which queries to perform
 
@@ -61,7 +60,7 @@ const pickQueries = function(){
             } if (template.substring(i, i+5) === '{vbg}'){
                 verbQueries++;
             } if (template.substring(i, i+8) === '{either}' ||
-                  template.substring(i, i+8) === '{anycard}'){
+                  template.substring(i, i+9) === '{anycard}'){
                 if (Math.random() > 0.5){
                     nounQueries++;
                     var supplObj = {
@@ -76,7 +75,7 @@ const pickQueries = function(){
                     }
                 }
                 template = template.supplant(supplObj);
-            } if (template.substring(i, i+8) === '{anycard}'){
+            } if (template.substring(i, i+9) === '{anycard}'){
                 anyQueries++;
             }
         }
@@ -170,16 +169,16 @@ const performMTGQueries = function(requestObj){
                     // console.log(card2Obj)
                     status = interpolate(status, card2Obj);
                     console.log('final2: ', status);
-                    // imageInterpolate(status);
-                    T.post('statuses/update', { status }, function(err, data, response) {
-                        console.log(data.created_at);
-                    })
+                    imageInterpolate(status);
+                    // T.post('statuses/update', { status }, function(err, data, response) {
+                    //     console.log(data.created_at);
+                    // })
                 })} else {
                     console.log('final1: ', status);
-                    // imageInterpolate(status);
-                    T.post('statuses/update', { status }, function(err, data, response) {
-                        console.log(data.created_at);
-                    })
+                    imageInterpolate(status);
+                    // T.post('statuses/update', { status }, function(err, data, response) {
+                    //     console.log(data.created_at);
+                    // })
                 }
         })
 }
@@ -187,8 +186,12 @@ const performMTGQueries = function(requestObj){
 const imageInterpolate = function(status){
     gm(framptraw)
         .stroke("#ffffff")
-        .font("Arial.ttf", 60)
+        .font("./Edmundsbury-Serif-Revised.ttf", 40)
+        // .color('FFFFFF')
+        .fill('#FFFFFF')
+        .stroke('#AAAAAA')
         .drawText(590, 250, status)
+        // .fill('white')
         .write('./resize.png', function (err) {
             if (!err) console.log('done');
         });

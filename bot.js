@@ -7,6 +7,11 @@ const rita = require('rita');
 const fs = require('fs');
 const gm = require('gm').subClass({imageMagick: true});
 const framptraw = './frampt-raw.jpg';
+// const scrape = require('./scrape.js');
+var crawler = require('img-crawler');  
+
+// var scrapeval = scrape();
+// console.log('scrapeval', scrapeval);
 
 var T = new Twit({
   consumer_key:         't1E9h6v79789TovbKyiQ1pBhB',
@@ -187,8 +192,52 @@ const performMTGQueries = function(requestObj){
         })
 }
 
+var deleteFolderRecursive = function(path) {
+  if( fs.existsSync(path) ) {
+    fs.readdirSync(path).forEach(function(file,index){
+      var curPath = path + "/" + file;
+      if(fs.lstatSync(curPath).isDirectory()) { // recurse
+        deleteFolderRecursive(curPath);
+      } else { // delete file
+        fs.unlinkSync(curPath);
+      }
+    });
+    fs.rmdirSync(path);
+  }
+};
+
+const deleteThenCrawl = function(){
+    var opts = {
+        url: 'http://steamcommunity.com/app/211420/screenshots/?p=1&browsefilter=mostrecent',
+        dist: 'dl'
+    };
+    deleteFolderRecursive('./dl/');
+    return crawler.crawl(opts, function(err, data) {
+        console.log('Downloaded %d from %s', data.imgs.length, opts.url);
+        var imgFolder = './dl/images.akamai.steamusercontent.com/ugc/';
+        imgFolder = imgFolder + fs.readdirSync(imgFolder)[0] + '/';
+        imgFolder = imgFolder + fs.readdirSync(imgFolder)[0] + '/';
+        var imgLocation = imgFolder + fs.readdirSync(imgFolder)[0];
+        console.log(imgLocation);
+        return imgLocation;
+    });   
+}
+
 const imageInterpolate = function(status){
-    gm(framptraw)
+    var opts = {
+        url: 'http://steamcommunity.com/app/211420/screenshots/?p=1&browsefilter=mostrecent',
+        dist: 'dl'
+    };
+    deleteFolderRecursive('./dl/');
+    return crawler.crawl(opts, function(err, data) {
+        console.log('Downloaded %d from %s', data.imgs.length, opts.url);
+        var imgFolder = './dl/images.akamai.steamusercontent.com/ugc/';
+        imgFolder = imgFolder + fs.readdirSync(imgFolder)[0] + '/';
+        imgFolder = imgFolder + fs.readdirSync(imgFolder)[0] + '/';
+        var imgLocation = imgFolder + fs.readdirSync(imgFolder)[0];
+        console.log(imgLocation);
+        // return imgLocation;
+        gm(imgLocation)
         .composite('./empty-message.jpg')
         .geometry('+317+200')
         .write('./final.png', function (err) {
@@ -213,8 +262,34 @@ const imageInterpolate = function(status){
                             if (!err) console.log('done');
                         })
                 })
-            // add ratings text too
         })
+    });   
+    // gm(framptraw)
+    //     .composite('./empty-message.jpg')
+    //     .geometry('+317+200')
+    //     .write('./final.png', function (err) {
+    //         // if (!err) console.log('done-img');
+    //         gm('./final.png')
+    //             // .stroke("#ffffff")
+    //             .font("./Edmundsbury-Serif-Revised.ttf", 40)
+    //             .fill('#FFFFFF')
+    //             .stroke('#888888')
+    //             .drawText(590, 250, status)
+    //             .write('./final.png', function (err) {
+    //                 // if (!err) console.log('done');
+    //                 let ratingNum = Math.floor(Math.random() * 1000) + 500;
+    //                 let rating = 'Rating             ' + ratingNum;
+    //                 gm('./final.png')
+    //                     // .stroke("#ffffff")
+    //                     .font("./Edmundsbury-Serif-Revised.ttf", 40)
+    //                     .fill('#FFFFFF')
+    //                     .stroke('#888888')
+    //                     .drawText(1100, 290, rating)
+    //                     .write('./final.png', function (err) {
+    //                         if (!err) console.log('done');
+    //                     })
+    //             })
+    //     })
 }
 
 const creature = performMTGQueries(requestObj);

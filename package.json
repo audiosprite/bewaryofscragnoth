@@ -9,11 +9,16 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cheerio": "^0.22.0",
+    "fs": "0.0.1-security",
     "gm": "^1.23.0",
+    "img-crawler": "0.0.2",
     "mtgsdk": "^0.1.1",
     "request": "^2.76.0",
     "request-promise": "^4.1.1",
+    "requests": "^0.1.7",
     "rita": "^1.1.40",
-    "twit": "^2.2.5"
+    "twit": "^2.2.5",
+    "url": "^0.11.0"
   }
 }

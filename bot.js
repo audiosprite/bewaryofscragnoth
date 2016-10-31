@@ -10,6 +10,7 @@ const framptraw = './frampt-raw.jpg';
 // const scrape = require('./scrape.js');
 var crawler = require('img-crawler');  
 var imgur = require('imgur');
+var cheerio = require('cheerio');
 
 // var scrapeval = scrape();
 // console.log('scrapeval', scrapeval);
@@ -56,7 +57,7 @@ const pickTemplate = function({bloodborne, dasouls, dasouls3}){
     return template.capitalize();
 }
 
-const template = pickTemplate(soapstone);
+var template = pickTemplate(soapstone);
 // var template = '{vbg} is effective but treat {anycard} with care';
 
 //function that organizes which queries to perform
@@ -243,30 +244,41 @@ const imageInterpolate = function(status){
         //     url: 'http://' + imgFolder.slice(5),
         //     dist: 'dl'
         // }
-        console.log(imgFolder);
-        imgur.uploadUrl(imgFolder)
-            .then(function (json) {
-                console.log(json.data.link);
-                var imgurOpts = {
-                    url: json.data.link,
+        var imgurOpts = {
+                    url: imgFolder,
                     dist: '1080'
                 }
-                crawler.crawl(opts, function(err, data) {
-                    console.log('Downloaded %d from %s', data.imgs.length, opts.url);
-                })
-            })
-            .catch(function (err) {
-                console.error(err.message);
-            });
-
-        // rp(imgFolder)
-        //     .then(function(data){
-        //         console.log(data)
+        console.log(imgFolder);
+        // imgur.uploadUrl(imgFolder)
+        //     .then(function (json) {
+        //         console.log(json.data.link);
+        //         var imgurOpts = {
+        //             url: json.data.link,
+        //             dist: '1080'
+        //         }
+        //         crawler.crawl(opts, function(err, data) {
+        //             console.log('err', err)
+        //             console.log('Downloaded %d from %s', data.imgs.length, opts.url);
+        //         })
         //     })
+        //     .catch(function (err) {
+        //         console.error(err.message);
+        //     });
 
-        // crawler.crawl(imgOpts, function(err, data){
+        var options = {
+            uri: imgFolder,
+            transform: function (body) {
+                return cheerio.load(body);
+            }
+        };
+
+        rp(options)
+            .then(function(data){
+                console.log(data);
+            })
+
+        // crawler.crawl(imgurOpts, function(err, data){
         //     console.log('data', data);
-        //     console.log(err);
         //     console.log('Downloaded %d from %s', data.imgs.length, opts.url);
         //     gm(imgFolder.slice(5))
         //     .composite('./empty-message.jpg')

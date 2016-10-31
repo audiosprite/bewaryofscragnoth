@@ -1,2 +1,5 @@
 node_modules,
-dl
+dl,
+crawlertest,
+imgurtest,
+scrape

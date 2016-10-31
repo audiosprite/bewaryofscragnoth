@@ -8,10 +8,10 @@ const fs = require('fs');
 const gm = require('gm').subClass({imageMagick: true});
 const framptraw = './frampt-raw.jpg';
 // const scrape = require('./scrape.js');
-var crawler = require('img-crawler');  
-var imgur = require('imgur');
-var cheerio = require('cheerio');
-
+const imgcrawler = require('img-crawler');  
+const imgur = require('imgur');
+const cheerio = require('cheerio');
+const crawler = require('crawler');
 // var scrapeval = scrape();
 // console.log('scrapeval', scrapeval);
 
@@ -214,7 +214,7 @@ var deleteFolderRecursive = function(path) {
 //         dist: 'dl'
 //     };
 //     deleteFolderRecursive('./dl/');
-//     return crawler.crawl(opts, function(err, data) {
+//     return imgcrawler.crawl(opts, function(err, data) {
 //         console.log('Downloaded %d from %s', data.imgs.length, opts.url);
 //         var imgFolder = './dl/images.akamai.steamusercontent.com/ugc/';
 //         imgFolder = imgFolder + fs.readdirSync(imgFolder)[0] + '/';
@@ -225,59 +225,96 @@ var deleteFolderRecursive = function(path) {
 //     });   
 // }
 
+const grabImage = function(){
+
+}
+
 const imageInterpolate = function(status){
     var opts = {
         url: 'http://steamcommunity.com/app/211420/screenshots/?p=1&browsefilter=mostrecent',
         dist: 'dl'
     };
     deleteFolderRecursive('./dl/');
-    crawler.crawl(opts, function(err, data) {
+    imgcrawler.crawl(opts, function(err, data) {
         console.log('Downloaded %d from %s', data.imgs.length, opts.url);
         var imgFolder = './dl/images.akamai.steamusercontent.com/ugc/';
+        // console.log(fs.readdirSync(imgFolder).length, 'folders');
+        var pickFolder = Math.floor(Math.random() * (fs.readdirSync(imgFolder).length));
+        imgFolder = imgFolder + fs.readdirSync(imgFolder)[pickFolder] + '/';
         imgFolder = imgFolder + fs.readdirSync(imgFolder)[0] + '/';
-        imgFolder = imgFolder + fs.readdirSync(imgFolder)[0] + '/';
-        imgFolder = 'http://' + imgFolder.slice(5);
-        // var imgLocation = imgFolder + fs.readdirSync(imgFolder)[0];
+        // imgFolder = 'http://' + imgFolder.slice(5);
+        // console.log(imgFolder);
+        var imgLocation = imgFolder + fs.readdirSync(imgFolder)[0];
+        // console.log(imgLocation)
+        gm(imgLocation)
+        // .composite('./empty-message.jpg') for 1080
+        .composite('./empty-message-small.png')
+        .geometry('+168+106')
+        .write('./final.png', function (err) {
+            gm('./final.png')
+                // .font("./Edmundsbury-Serif-Revised.ttf", 40) for 1080
+                .font("./Edmundsbury-Serif-Revised.ttf", 20)
+                .fill('#FFFFFF')
+                .stroke('#888888')
+                .drawText(312, 132, status)
+                // .drawText(590, 250, status) for 1080
+                .write('./final.png', function (err) {
+                    let ratingNum = Math.floor(Math.random() * 1000) + 500;
+                    let rating = 'Rating             ' + ratingNum;
+                    gm('./final.png')
+                        // .font("./Edmundsbury-Serif-Revised.ttf", 40) for 1080
+                        .font("./Edmundsbury-Serif-Revised.ttf", 20)
+                        .fill('#FFFFFF')
+                        .stroke('#888888')
+                        .drawText(583, 153, rating)
+                        // .drawText(1100, 290, rating) for 1080
+                        .write('./final.png', function (err) {
+                            if (!err) console.log('done');
+                        })
+                })
+        })
+
         // console.log(imgLocation);
         // var imgOpts = {
         //     // url: imgFolder.slice(5),
         //     url: 'http://' + imgFolder.slice(5),
         //     dist: 'dl'
         // }
-        var imgurOpts = {
-                    url: imgFolder,
-                    dist: '1080'
-                }
-        console.log(imgFolder);
+
+        // var imgurOpts = {
+        //             url: imgFolder,
+        //             dist: '1080'
+        //         }
+        // console.log('imgfolder', imgFolder);
         // imgur.uploadUrl(imgFolder)
         //     .then(function (json) {
-        //         console.log(json.data.link);
+        //         console.log('jsondatalink', json.data.link);
         //         var imgurOpts = {
         //             url: json.data.link,
         //             dist: '1080'
         //         }
-        //         crawler.crawl(opts, function(err, data) {
+        //         imgcrawler.crawl(imgurOpts, function(err, data) {
         //             console.log('err', err)
         //             console.log('Downloaded %d from %s', data.imgs.length, opts.url);
         //         })
         //     })
         //     .catch(function (err) {
-        //         console.error(err.message);
+        //         console.error('err', err.message);
         //     });
 
-        var options = {
-            uri: imgFolder,
-            transform: function (body) {
-                return cheerio.load(body);
-            }
-        };
+        // var options = {
+        //     uri: imgFolder,
+        //     transform: function (body) {
+        //         return cheerio.load(body);
+        //     }
+        // };
 
-        rp(options)
-            .then(function(data){
-                console.log(data);
-            })
+        // rp(options)
+        //     .then(function(data){
+        //         console.log(data);
+        //     })
 
-        // crawler.crawl(imgurOpts, function(err, data){
+        // imgcrawler.crawl(imgurOpts, function(err, data){
         //     console.log('data', data);
         //     console.log('Downloaded %d from %s', data.imgs.length, opts.url);
         //     gm(imgFolder.slice(5))

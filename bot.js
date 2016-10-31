@@ -206,22 +206,22 @@ var deleteFolderRecursive = function(path) {
   }
 };
 
-const deleteThenCrawl = function(){
-    var opts = {
-        url: 'http://steamcommunity.com/app/211420/screenshots/?p=1&browsefilter=mostrecent',
-        dist: 'dl'
-    };
-    deleteFolderRecursive('./dl/');
-    return crawler.crawl(opts, function(err, data) {
-        console.log('Downloaded %d from %s', data.imgs.length, opts.url);
-        var imgFolder = './dl/images.akamai.steamusercontent.com/ugc/';
-        imgFolder = imgFolder + fs.readdirSync(imgFolder)[0] + '/';
-        imgFolder = imgFolder + fs.readdirSync(imgFolder)[0] + '/';
-        var imgLocation = imgFolder + fs.readdirSync(imgFolder)[0];
-        console.log(imgLocation);
-        return imgLocation;
-    });   
-}
+// const deleteThenCrawl = function(){
+//     var opts = {
+//         url: 'http://steamcommunity.com/app/211420/screenshots/?p=1&browsefilter=mostrecent',
+//         dist: 'dl'
+//     };
+//     deleteFolderRecursive('./dl/');
+//     return crawler.crawl(opts, function(err, data) {
+//         console.log('Downloaded %d from %s', data.imgs.length, opts.url);
+//         var imgFolder = './dl/images.akamai.steamusercontent.com/ugc/';
+//         imgFolder = imgFolder + fs.readdirSync(imgFolder)[0] + '/';
+//         imgFolder = imgFolder + fs.readdirSync(imgFolder)[0] + '/';
+//         var imgLocation = imgFolder + fs.readdirSync(imgFolder)[0];
+//         console.log(imgLocation);
+//         return imgLocation;
+//     });   
+// }
 
 const imageInterpolate = function(status){
     var opts = {
@@ -229,40 +229,77 @@ const imageInterpolate = function(status){
         dist: 'dl'
     };
     deleteFolderRecursive('./dl/');
-    return crawler.crawl(opts, function(err, data) {
+    crawler.crawl(opts, function(err, data) {
         console.log('Downloaded %d from %s', data.imgs.length, opts.url);
         var imgFolder = './dl/images.akamai.steamusercontent.com/ugc/';
         imgFolder = imgFolder + fs.readdirSync(imgFolder)[0] + '/';
         imgFolder = imgFolder + fs.readdirSync(imgFolder)[0] + '/';
+        imgFolder = 'http://' + imgFolder.slice(5);
         var imgLocation = imgFolder + fs.readdirSync(imgFolder)[0];
         console.log(imgLocation);
-        // return imgLocation;
-        gm(imgLocation)
-        .composite('./empty-message.jpg')
-        .geometry('+317+200')
-        .write('./final.png', function (err) {
-            // if (!err) console.log('done-img');
-            gm('./final.png')
-                // .stroke("#ffffff")
-                .font("./Edmundsbury-Serif-Revised.ttf", 40)
-                .fill('#FFFFFF')
-                .stroke('#888888')
-                .drawText(590, 250, status)
-                .write('./final.png', function (err) {
-                    // if (!err) console.log('done');
-                    let ratingNum = Math.floor(Math.random() * 1000) + 500;
-                    let rating = 'Rating             ' + ratingNum;
-                    gm('./final.png')
-                        // .stroke("#ffffff")
-                        .font("./Edmundsbury-Serif-Revised.ttf", 40)
-                        .fill('#FFFFFF')
-                        .stroke('#888888')
-                        .drawText(1100, 290, rating)
-                        .write('./final.png', function (err) {
-                            if (!err) console.log('done');
-                        })
-                })
-        })
+        var imgOpts = {
+            // url: imgFolder.slice(5),
+            url: 'http://' + imgFolder.slice(5),
+            dist: 'dl'
+        }
+        console.log(imgOpts)
+        rp(imgFolder)
+            .then(function(data){
+                console.log(data)
+            })
+        // crawler.crawl(imgOpts, function(err, data){
+        //     console.log('data', data);
+        //     console.log(err);
+        //     console.log('Downloaded %d from %s', data.imgs.length, opts.url);
+        //     gm(imgFolder.slice(5))
+        //     .composite('./empty-message.jpg')
+        //     .geometry('+317+200')
+        //     .write('./final.png', function (err) {
+        //         gm('./final.png')
+        //             .font("./Edmundsbury-Serif-Revised.ttf", 40)
+        //             .fill('#FFFFFF')
+        //             .stroke('#888888')
+        //             .drawText(590, 250, status)
+        //             // .drawText(590, 250, status) for 1080
+        //             .write('./final.png', function (err) {
+        //                 let ratingNum = Math.floor(Math.random() * 1000) + 500;
+        //                 let rating = 'Rating             ' + ratingNum;
+        //                 gm('./final.png')
+        //                     .font("./Edmundsbury-Serif-Revised.ttf", 40)
+        //                     .fill('#FFFFFF')
+        //                     .stroke('#888888')
+        //                     .drawText(1100, 290, rating)
+        //                     // .drawText(1100, 290, rating) for 1080
+        //                     .write('./final.png', function (err) {
+        //                         if (!err) console.log('done');
+        //                     })
+        //             })
+        //     })
+        // })
+        // gm(imgLocation)
+        // .composite('./empty-message.jpg')
+        // .geometry('+317+200')
+        // .write('./final.png', function (err) {
+        //     gm('./final.png')
+        //         .font("./Edmundsbury-Serif-Revised.ttf", 40)
+        //         .fill('#FFFFFF')
+        //         .stroke('#888888')
+        //         .drawText(590, 250, status)
+        //         // .drawText(590, 250, status) for 1080
+        //         .write('./final.png', function (err) {
+        //             let ratingNum = Math.floor(Math.random() * 1000) + 500;
+        //             let rating = 'Rating             ' + ratingNum;
+        //             gm('./final.png')
+        //                 .font("./Edmundsbury-Serif-Revised.ttf", 40)
+        //                 .fill('#FFFFFF')
+        //                 .stroke('#888888')
+        //                 .drawText(1100, 290, rating)
+        //                 // .drawText(1100, 290, rating) for 1080
+        //                 .write('./final.png', function (err) {
+        //                     if (!err) console.log('done');
+        //                 })
+        //         })
+        // })
     });   
     // gm(framptraw)
     //     .composite('./empty-message.jpg')

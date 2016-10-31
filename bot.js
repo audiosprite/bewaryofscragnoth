@@ -185,16 +185,21 @@ const performMTGQueries = function(requestObj){
 
 const imageInterpolate = function(status){
     gm(framptraw)
-        .stroke("#ffffff")
-        .font("./Edmundsbury-Serif-Revised.ttf", 40)
-        // .color('FFFFFF')
-        .fill('#FFFFFF')
-        .stroke('#AAAAAA')
-        .drawText(590, 250, status)
-        // .fill('white')
-        .write('./resize.png', function (err) {
-            if (!err) console.log('done');
-        });
+        .composite('./empty-message.jpg')
+        .geometry('+317+200')
+        .write('./final.png', function (err) {
+            // if (!err) console.log('done-img');
+            gm('./final.png')
+                .stroke("#ffffff")
+                .font("./Edmundsbury-Serif-Revised.ttf", 40)
+                .fill('#FFFFFF')
+                .stroke('#AAAAAA')
+                .drawText(590, 250, status)
+                .write('./final.png', function (err) {
+                    if (!err) console.log('done');
+                })
+            // add ratings text too
+        })
 }
 
 const creature = performMTGQueries(requestObj);

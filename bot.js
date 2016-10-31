@@ -9,6 +9,7 @@ const gm = require('gm').subClass({imageMagick: true});
 const framptraw = './frampt-raw.jpg';
 // const scrape = require('./scrape.js');
 var crawler = require('img-crawler');  
+var imgur = require('imgur');
 
 // var scrapeval = scrape();
 // console.log('scrapeval', scrapeval);
@@ -235,18 +236,34 @@ const imageInterpolate = function(status){
         imgFolder = imgFolder + fs.readdirSync(imgFolder)[0] + '/';
         imgFolder = imgFolder + fs.readdirSync(imgFolder)[0] + '/';
         imgFolder = 'http://' + imgFolder.slice(5);
-        var imgLocation = imgFolder + fs.readdirSync(imgFolder)[0];
-        console.log(imgLocation);
-        var imgOpts = {
-            // url: imgFolder.slice(5),
-            url: 'http://' + imgFolder.slice(5),
-            dist: 'dl'
-        }
-        console.log(imgOpts)
-        rp(imgFolder)
-            .then(function(data){
-                console.log(data)
+        // var imgLocation = imgFolder + fs.readdirSync(imgFolder)[0];
+        // console.log(imgLocation);
+        // var imgOpts = {
+        //     // url: imgFolder.slice(5),
+        //     url: 'http://' + imgFolder.slice(5),
+        //     dist: 'dl'
+        // }
+        console.log(imgFolder);
+        imgur.uploadUrl(imgFolder)
+            .then(function (json) {
+                console.log(json.data.link);
+                var imgurOpts = {
+                    url: json.data.link,
+                    dist: '1080'
+                }
+                crawler.crawl(opts, function(err, data) {
+                    console.log('Downloaded %d from %s', data.imgs.length, opts.url);
+                })
             })
+            .catch(function (err) {
+                console.error(err.message);
+            });
+
+        // rp(imgFolder)
+        //     .then(function(data){
+        //         console.log(data)
+        //     })
+
         // crawler.crawl(imgOpts, function(err, data){
         //     console.log('data', data);
         //     console.log(err);
@@ -276,6 +293,7 @@ const imageInterpolate = function(status){
         //             })
         //     })
         // })
+
         // gm(imgLocation)
         // .composite('./empty-message.jpg')
         // .geometry('+317+200')

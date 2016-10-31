@@ -38,3 +38,7 @@ const deleteThenCrawl = function(){
 // deleteThenCrawl();
 
 module.exports = deleteThenCrawl;
+
+// var imgFolder = 'http://images.akamai.steamusercontent.com/ugc/395581850122536314/97C8E4F7EB1D142A01F29034DDC4D076EE4BBDA6/'
+
+// console.log(fs.readdirSync(imgFolder));

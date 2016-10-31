@@ -25,6 +25,10 @@ String.prototype.supplant = function (o) {
     );
 };
 
+String.prototype.capitalize = function() {
+    return this.charAt(0).toUpperCase() + this.slice(1);
+};
+
 //trying to practice API so using api.magicthegathering.io instead of mtgsdk
 
 //function that picks a dark souls message template
@@ -38,12 +42,12 @@ const pickTemplate = function({bloodborne, dasouls, dasouls3}){
         var templateIndexB = Math.floor(Math.random() * (usedTemplates.templates.length));
         var whichConjunction = usedTemplates.conjunctions[Math.floor(Math.random() * (usedTemplates.conjunctions.length))];
         // console.log('whichConjunction: ', whichConjunction, usedTemplates.length)
-        var template = usedTemplates.templates[templateIndexA] + whichConjunction + " " + usedTemplates.templates[templateIndexB];
+        var template = usedTemplates.templates[templateIndexA] + whichConjunction + "\n" + usedTemplates.templates[templateIndexB];
     } else {
         template = usedTemplates.templates[templateIndexA];
     }
     // console.log(rita.RiTa.getPosTagsInline(template));
-    return template;
+    return template.capitalize();
 }
 
 const template = pickTemplate(soapstone);
@@ -190,13 +194,24 @@ const imageInterpolate = function(status){
         .write('./final.png', function (err) {
             // if (!err) console.log('done-img');
             gm('./final.png')
-                .stroke("#ffffff")
+                // .stroke("#ffffff")
                 .font("./Edmundsbury-Serif-Revised.ttf", 40)
                 .fill('#FFFFFF')
-                .stroke('#AAAAAA')
+                .stroke('#888888')
                 .drawText(590, 250, status)
                 .write('./final.png', function (err) {
-                    if (!err) console.log('done');
+                    // if (!err) console.log('done');
+                    let ratingNum = Math.floor(Math.random() * 1000) + 500;
+                    let rating = 'Rating             ' + ratingNum;
+                    gm('./final.png')
+                        // .stroke("#ffffff")
+                        .font("./Edmundsbury-Serif-Revised.ttf", 40)
+                        .fill('#FFFFFF')
+                        .stroke('#888888')
+                        .drawText(1100, 290, rating)
+                        .write('./final.png', function (err) {
+                            if (!err) console.log('done');
+                        })
                 })
             // add ratings text too
         })

@@ -54,8 +54,8 @@ const pickTemplate = function({bloodborne, dasouls, dasouls3}){
     return template.capitalize();
 }
 
-// var template = pickTemplate(soapstone);
-var template = '{vbg} is effective but treat {anycard} with care';
+var template = pickTemplate(soapstone);
+// var template = '{vbg} is effective but treat {anycard} with care';
 
 //function that organizes which queries to perform
 

@@ -1,5 +1,6 @@
-node_modules,
-dl,
-crawlertest,
-imgurtest,
+node_modules
+dl
+crawlertest
+imgurtest
 scrape
+t

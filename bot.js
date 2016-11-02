@@ -266,7 +266,7 @@ const imageInterpolate = function(status){
                         .font("./Edmundsbury-Serif-Revised.ttf", 20)
                         .fill('#FFFFFF')
                         .stroke('#888888')
-                        .drawText(583, 153, rating)
+                        .drawText(582, 153, rating)
                         // .drawText(1100, 290, rating) for 1080
                         .write('./final.png', function (err) {
                             if (!err) console.log('done');

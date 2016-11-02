@@ -1,27 +1,24 @@
-// const mtg = require('mtgsdk');
 const Twit = require('twit');
 const soapstone = require('./soapstone');
-const request = require('request');
+// const request = require('request');
 const rp = require('request-promise');
 const rita = require('rita');
 const fs = require('fs');
 const gm = require('gm').subClass({imageMagick: true});
 const framptraw = './frampt-raw.jpg';
-// const scrape = require('./scrape.js');
 const imgcrawler = require('img-crawler');  
 const imgur = require('imgur');
-const cheerio = require('cheerio');
-const crawler = require('crawler');
-// var scrapeval = scrape();
-// console.log('scrapeval', scrapeval);
 
-var T = new Twit({
-  consumer_key:         't1E9h6v79789TovbKyiQ1pBhB',
-  consumer_secret:      '0yHMEgTEWBiUenMmiahLzkUWtFE0iKTH4jupEoqq3Nxz7jyTxH',
-  access_token:         '792118844148023296-DgHa6H4ju6Efeq8La4OdhIi7SWijYx6',
-  access_token_secret:  'i2B31R52neKt1qrZWUF0R42r4EqLM4nJFDGl9iX6Eh76h',
-  timeout_ms:           60*1000,  // optional HTTP request timeout to apply to all requests.
-})
+// const twitObject = {
+//   consumer_key:         '...',
+//   consumer_secret:      '...',
+//   access_token:         '...',
+//   access_token_secret:  '...',
+//   timeout_ms:           60*1000,  // optional HTTP request timeout to apply to all requests.
+// }
+
+const twitCredentials = require('./t.js');
+var T = new Twit(twitCredentials)
 
 String.prototype.supplant = function (o) {
     return this.replace(/{([^{}]*)}/g,
@@ -53,12 +50,12 @@ const pickTemplate = function({bloodborne, dasouls, dasouls3}){
     } else {
         template = usedTemplates.templates[templateIndexA];
     }
-    // console.log(rita.RiTa.getPosTagsInline(template));
+    console.log(rita.RiTa.getPosTagsInline(template));
     return template.capitalize();
 }
 
-var template = pickTemplate(soapstone);
-// var template = '{vbg} is effective but treat {anycard} with care';
+// var template = pickTemplate(soapstone);
+var template = '{vbg} is effective but treat {anycard} with care';
 
 //function that organizes which queries to perform
 
@@ -100,6 +97,7 @@ const pickQueries = function(){
 }
 
 const queries = pickQueries();
+// console.log(queries);
 
 //function that updates requestObj
 
@@ -136,6 +134,7 @@ const updateRequestObj = function(queries){
 }
 
 requestObj = updateRequestObj(queries);
+// console.log(requestObj);
 
 //function that performs mtg queries, then posts
 
@@ -208,23 +207,6 @@ var deleteFolderRecursive = function(path) {
   }
 };
 
-// const deleteThenCrawl = function(){
-//     var opts = {
-//         url: 'http://steamcommunity.com/app/211420/screenshots/?p=1&browsefilter=mostrecent',
-//         dist: 'dl'
-//     };
-//     deleteFolderRecursive('./dl/');
-//     return imgcrawler.crawl(opts, function(err, data) {
-//         console.log('Downloaded %d from %s', data.imgs.length, opts.url);
-//         var imgFolder = './dl/images.akamai.steamusercontent.com/ugc/';
-//         imgFolder = imgFolder + fs.readdirSync(imgFolder)[0] + '/';
-//         imgFolder = imgFolder + fs.readdirSync(imgFolder)[0] + '/';
-//         var imgLocation = imgFolder + fs.readdirSync(imgFolder)[0];
-//         console.log(imgLocation);
-//         return imgLocation;
-//     });   
-// }
-
 const grabImage = function(){
 
 }
@@ -274,126 +256,7 @@ const imageInterpolate = function(status){
                 })
         })
 
-        // console.log(imgLocation);
-        // var imgOpts = {
-        //     // url: imgFolder.slice(5),
-        //     url: 'http://' + imgFolder.slice(5),
-        //     dist: 'dl'
-        // }
-
-        // var imgurOpts = {
-        //             url: imgFolder,
-        //             dist: '1080'
-        //         }
-        // console.log('imgfolder', imgFolder);
-        // imgur.uploadUrl(imgFolder)
-        //     .then(function (json) {
-        //         console.log('jsondatalink', json.data.link);
-        //         var imgurOpts = {
-        //             url: json.data.link,
-        //             dist: '1080'
-        //         }
-        //         imgcrawler.crawl(imgurOpts, function(err, data) {
-        //             console.log('err', err)
-        //             console.log('Downloaded %d from %s', data.imgs.length, opts.url);
-        //         })
-        //     })
-        //     .catch(function (err) {
-        //         console.error('err', err.message);
-        //     });
-
-        // var options = {
-        //     uri: imgFolder,
-        //     transform: function (body) {
-        //         return cheerio.load(body);
-        //     }
-        // };
-
-        // rp(options)
-        //     .then(function(data){
-        //         console.log(data);
-        //     })
-
-        // imgcrawler.crawl(imgurOpts, function(err, data){
-        //     console.log('data', data);
-        //     console.log('Downloaded %d from %s', data.imgs.length, opts.url);
-        //     gm(imgFolder.slice(5))
-        //     .composite('./empty-message.jpg')
-        //     .geometry('+317+200')
-        //     .write('./final.png', function (err) {
-        //         gm('./final.png')
-        //             .font("./Edmundsbury-Serif-Revised.ttf", 40)
-        //             .fill('#FFFFFF')
-        //             .stroke('#888888')
-        //             .drawText(590, 250, status)
-        //             // .drawText(590, 250, status) for 1080
-        //             .write('./final.png', function (err) {
-        //                 let ratingNum = Math.floor(Math.random() * 1000) + 500;
-        //                 let rating = 'Rating             ' + ratingNum;
-        //                 gm('./final.png')
-        //                     .font("./Edmundsbury-Serif-Revised.ttf", 40)
-        //                     .fill('#FFFFFF')
-        //                     .stroke('#888888')
-        //                     .drawText(1100, 290, rating)
-        //                     // .drawText(1100, 290, rating) for 1080
-        //                     .write('./final.png', function (err) {
-        //                         if (!err) console.log('done');
-        //                     })
-        //             })
-        //     })
-        // })
-
-        // gm(imgLocation)
-        // .composite('./empty-message.jpg')
-        // .geometry('+317+200')
-        // .write('./final.png', function (err) {
-        //     gm('./final.png')
-        //         .font("./Edmundsbury-Serif-Revised.ttf", 40)
-        //         .fill('#FFFFFF')
-        //         .stroke('#888888')
-        //         .drawText(590, 250, status)
-        //         // .drawText(590, 250, status) for 1080
-        //         .write('./final.png', function (err) {
-        //             let ratingNum = Math.floor(Math.random() * 1000) + 500;
-        //             let rating = 'Rating             ' + ratingNum;
-        //             gm('./final.png')
-        //                 .font("./Edmundsbury-Serif-Revised.ttf", 40)
-        //                 .fill('#FFFFFF')
-        //                 .stroke('#888888')
-        //                 .drawText(1100, 290, rating)
-        //                 // .drawText(1100, 290, rating) for 1080
-        //                 .write('./final.png', function (err) {
-        //                     if (!err) console.log('done');
-        //                 })
-        //         })
-        // })
     });   
-    // gm(framptraw)
-    //     .composite('./empty-message.jpg')
-    //     .geometry('+317+200')
-    //     .write('./final.png', function (err) {
-    //         // if (!err) console.log('done-img');
-    //         gm('./final.png')
-    //             // .stroke("#ffffff")
-    //             .font("./Edmundsbury-Serif-Revised.ttf", 40)
-    //             .fill('#FFFFFF')
-    //             .stroke('#888888')
-    //             .drawText(590, 250, status)
-    //             .write('./final.png', function (err) {
-    //                 // if (!err) console.log('done');
-    //                 let ratingNum = Math.floor(Math.random() * 1000) + 500;
-    //                 let rating = 'Rating             ' + ratingNum;
-    //                 gm('./final.png')
-    //                     // .stroke("#ffffff")
-    //                     .font("./Edmundsbury-Serif-Revised.ttf", 40)
-    //                     .fill('#FFFFFF')
-    //                     .stroke('#888888')
-    //                     .drawText(1100, 290, rating)
-    //                     .write('./final.png', function (err) {
-    //                         if (!err) console.log('done');
-    //                     })
-    //             })
-    //     })
 }
 
 const creature = performMTGQueries(requestObj);

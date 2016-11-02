@@ -179,16 +179,24 @@ const performMTGQueries = function(requestObj){
                     // console.log(card2Obj)
                     status = interpolate(status, card2Obj);
                     console.log('final2: ', status);
-                    imageInterpolate(status);
-                    // T.post('statuses/update', { status }, function(err, data, response) {
-                    //     console.log(data.created_at);
-                    // })
+
+                    // uncomment these to post images!!
+                    // imageInterpolate(status);
+
+                    // uncomment these to post strings!!
+                    T.post('statuses/update', { status }, function(err, data, response) {
+                        console.log(data.created_at);
+                    })
                 })} else {
                     console.log('final1: ', status);
-                    imageInterpolate(status);
-                    // T.post('statuses/update', { status }, function(err, data, response) {
-                    //     console.log(data.created_at);
-                    // })
+
+                    // uncomment these to post images!!
+                    // imageInterpolate(status);
+
+                    // uncomment these to post strings!!
+                    T.post('statuses/update', { status }, function(err, data, response) {
+                        console.log(data.created_at);
+                    })
                 }
         })
 }
@@ -207,8 +215,27 @@ var deleteFolderRecursive = function(path) {
   }
 };
 
-const grabImage = function(){
-
+const tweetImage = function(){
+    var b64content = fs.readFileSync('./final.png', { encoding: 'base64' });
+    T.post('media/upload', { media_data: b64content }, function (err, data, response) {
+        // now we can assign alt text to the media, for use by screen readers and
+        // other text-based presentations and interpreters
+        var mediaIdStr = data.media_id_string;
+        var altText = "alttext";
+        var meta_params = { media_id: mediaIdStr, alt_text: { text: altText } };
+        console.log('1', data)
+        T.post('media/metadata/create', meta_params, function (err, data, response) {
+            console.log('2', err)
+            if (!err) {
+            // now we can reference the media and post a tweet (media will attach to the tweet)
+            var params = { status: '', media_ids: [mediaIdStr] }
+            
+            T.post('statuses/update', params, function (err, data, response) {
+                console.log(data)
+                })
+            }
+        })
+    })
 }
 
 const imageInterpolate = function(status){
@@ -252,6 +279,7 @@ const imageInterpolate = function(status){
                         // .drawText(1100, 290, rating) for 1080
                         .write('./final.png', function (err) {
                             if (!err) console.log('done');
+                            tweetImage();
                         })
                 })
         })
